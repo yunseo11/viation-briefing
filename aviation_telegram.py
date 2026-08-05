@@ -1,7 +1,7 @@
 import os
 import feedparser, anthropic, requests, datetime
 
-CLAUDE_API_KEY   = "os.environ.get("CLAUDE_API_KEY")"
+CLAUDE_API_KEY   = os.environ.get("CLAUDE_API_KEY")
 TELEGRAM_TOKEN   = "8385206243:AAHvdOIMBkknpJLl83iiPf8RZYHRK09sS5U"
 TELEGRAM_CHAT_ID = "8909776847"
 
