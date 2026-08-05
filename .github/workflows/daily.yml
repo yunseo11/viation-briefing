@@ -1,0 +1,19 @@
+name: Daily Aviation Briefing
+
+on:
+  schedule:
+    - cron: '0 22 * * *'  # 한국시간 오전 7시 (UTC 22:00)
+  workflow_dispatch:
+
+jobs:
+  briefing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install feedparser anthropic requests
+      - run: python aviation_telegram.py
+        env:
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
