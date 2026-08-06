@@ -42,7 +42,7 @@ def send(text):
         parts.append(text[:idx])
         text = text[idx:].strip()
     parts.append(text)
-for i, part in enumerate(parts):
+    for i, part in enumerate(parts):
         r = requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
             json={"chat_id": TELEGRAM_CHAT_ID, "text": part, "parse_mode": "Markdown"})
         if r.status_code != 200:
