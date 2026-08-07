@@ -2,7 +2,7 @@ name: Daily Aviation Briefing
 
 on:
   schedule:
-    - cron: '0 22 * * *'  # 한국시간 오전 7시 (UTC 22:00)
+    - cron: '7 22 * * *' # 한국시간 오전 7시 7분 (UTC 22:07, 정각을 피해 지연/스킵 방지)
   workflow_dispatch:
 
 jobs:
