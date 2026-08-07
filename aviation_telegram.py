@@ -65,10 +65,10 @@ def main():
     korea_search = web_search(client, "2026년 대한민국 UAM eVTOL 항공부품 인증 정부과제 공고 국토부 방사청 산업부 중기부 경남 부산 대구 인천 서울 경기 지자체 항공 UAM 사업공고 K-UAM 그랜드챌린지 NTIS IRIS 항공인증 과제공고")
     print("✍️ 해외 브리핑 작성 중...")
     m1 = client.messages.create(model="claude-sonnet-4-6", max_tokens=2200,
-        messages=[{"role":"user","content":f"항공 인증 전문가. 오늘({today}) 해외 항공 뉴스 텔레그램 메시지 작성. 구체적 사실 기반.\n\n[RSS]\n{news_text}\n\n[웹검색]\n{global_search}\n\n형식:\n✈️ *AW항공브리핑 해외편 | {today}*\n\n📌 *핵심 3줄*\n내용\n\n🚁 *UAM eVTOL 글로벌 동향*\n2~3문장\n\n📋 *FAA EASA 인증 변화*\n2~3문장\n\n💼 *글로벌 비즈니스 투자*\n2문장\n\n_AW인증솔루션_"}])
+        messages=[{"role":"user","content":f"항공 인증 전문가. 오늘({today}) 해외 항공 뉴스 텔레그램 메시지 작성. 구체적 사실 기반. 각 섹션은 먼저 핵심 사실을 불릿(•)으로 2~3개 정리하고, 그 아래에 짧은 줄글로 1~2문장 부연 설명을 붙여줘.\n\n[RSS]\n{news_text}\n\n[웹검색]\n{global_search}\n\n형식:\n✈️ *AW항공브리핑 해외편 | {today}*\n\n📌 *핵심 요약*\n• 불릿1\n• 불릿2\n• 불릿3\n\n🚁 *UAM eVTOL 글로벌 동향*\n• 불릿1\n• 불릿2\n줄글 1~2문장\n\n📋 *FAA EASA 인증 변화*\n• 불릿1\n• 불릿2\n줄글 1~2문장\n\n💼 *글로벌 비즈니스 투자*\n• 불릿1\n• 불릿2\n줄글 1문장\n\n_AW인증솔루션_"}])
     print("✍️ 국내 브리핑 작성 중...")
     m2 = client.messages.create(model="claude-sonnet-4-6", max_tokens=2200,
-        messages=[{"role":"user","content":f"항공 인증 전문가. 오늘({today}) 국내 항공 동향 텔레그램 메시지 작성. 구체적 사실 기반.\n\n[웹검색]\n{korea_search}\n\n형식:\n🇰🇷 *AW항공브리핑 국내편 | {today}*\n\n🏛️ *국토부 방사청 정책 동향*\n2~3문장\n\n📢 *정부 지자체 과제 공고*\n불릿 과제명 및 내용\n불릿 과제명 및 내용\n\n🗺️ *지자체 항공 UAM 사업*\n각 지자체 내용\n\n💡 *국내 기업 시사점*\n2~3문장\n\n_AW인증솔루션 | awcertsolution.kr_"}])
+                messages=[{"role":"user","content":f"항공 인증 전문가. 오늘({today}) 국내 항공 동향 텔레그램 메시지 작성. 구체적 사실 기반. 각 섹션은 먼저 핵심 사실을 불릿(•)으로 2~3개 정리하고, 그 아래에 짧은 줄글로 1~2문장 부연 설명을 붙여줘.\n\n[웹검색]\n{korea_search}\n\n형식:\n🇰🇷 *AW항공브리핑 국내편 | {today}*\n\n🏛️ *국토부 방사청 정책 동향*\n• 불릿1\n• 불릿2\n줄글 1~2문장\n\n📢 *정부 지자체 과제 공고*\n• 과제명 및 내용\n• 과제명 및 내용\n\n🗺️ *지자체 항공 UAM 사업*\n• 지자체1 내용\n• 지자체2 내용\n\n💡 *국내 기업 시사점*\n• 불릿1\n• 불릿2\n줄글 1~2문장\n\n_AW인증솔루션 | awcertsolution.kr_"}])
     send(m1.content[0].text)
     send(m2.content[0].text)
     print("\n🎉 완료!")
