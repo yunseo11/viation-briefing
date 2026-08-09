@@ -34,7 +34,7 @@ def web_search(client, query):
     return "".join(b.text for b in msg.content if hasattr(b, "text"))
 
 def send(text):
-    max_len = 2000
+    max_len = 4000
     parts = []
     while len(text) > max_len:
         idx = text[:max_len].rfind("\n")
