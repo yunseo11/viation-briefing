@@ -1,6 +1,5 @@
 import os
 import feedparser, anthropic, requests, datetime
-from PIL import Image, ImageDraw, ImageFont
 
 CLAUDE_API_KEY   = os.environ.get("CLAUDE_API_KEY")
 TELEGRAM_TOKEN   = "8385206243:AAHvdOIMBkknpJLl83iiPf8RZYHRK09sS5U"
@@ -50,76 +49,6 @@ def send(text):
             r = requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
                 json={"chat_id": TELEGRAM_CHAT_ID, "text": part})
         print(f"✅ {i+1}/{len(parts)} 발송 완료!" if r.status_code==200 else f"❌ 실패: {r.text}")
-def extract_headline(text):
-    lines = [l.strip() for l in text.split("\n") if l.strip()]
-    if len(lines) < 2:
-        return ""
-    h = lines[1].strip('"').strip()
-    for dash in ["\u2014", "-", "\u3161"]:
-        if dash in h:
-            h = h.split(dash)[0].strip()
-            break
-    return h
-
-def make_banner(headline_global, headline_korea, date_str, path):
-    W, H = 1200, 627
-    bg = (11, 30, 61)
-    accent = (34, 211, 238)
-    img = Image.new("RGB", (W, H), bg)
-    draw = ImageDraw.Draw(img)
-    draw.ellipse([W-360, -260, W-360+520, -260+520], fill=(18, 42, 78))
-    draw.ellipse([W-180, -140, W-180+240, -140+240], fill=(23, 50, 87))
-    font_dir = "/usr/share/fonts/truetype/nanum"
-    def load_font(name, size, fallback="NanumGothic.ttf"):
-        try:
-            return ImageFont.truetype(f"{font_dir}/{name}", size)
-        except Exception:
-            return ImageFont.truetype(f"{font_dir}/{fallback}", size)
-    f_eyebrow = load_font("NanumGothicBold.ttf", 24)
-    f_head = load_font("NanumGothicExtraBold.ttf", 40)
-    f_foot = load_font("NanumGothicBold.ttf", 20)
-    draw.text((84, 90), f"AW\uc555\uacf5\ube0c\ub9ac\ud551 \u00b7 {date_str}", font=f_eyebrow, fill=accent)
-
-    def wrap(t, font, max_w):
-        words = t.split(" ")
-        lines, cur = [], ""
-        for w in words:
-            trial = (cur + " " + w).strip()
-            if draw.textlength(trial, font=font) <= max_w:
-                cur = trial
-            else:
-                if cur:
-                    lines.append(cur)
-                cur = w
-        if cur:
-            lines.append(cur)
-        return lines
-
-    max_w = W - 84 * 2
-    y = 150
-    for label, headline in [("\ud574\uc678\ud3b8", headline_global), ("\uad6d\ub0b4\ud3b8", headline_korea)]:
-        if not headline:
-            continue
-        wrapped = wrap(f"{label} \u00b7 {headline}", f_head, max_w)[:2]
-        for wline in wrapped:
-            draw.text((84, y), wline, font=f_head, fill=(255, 255, 255))
-            y += 52
-        y += 24
-
-    draw.line([(84, H - 90), (W - 84, H - 90)], fill=(34, 64, 95), width=2)
-    draw.text((84, H - 70), "AW\uc778\uc99d\uc194\ub8e8\uc158  |  awcertsolution.kr", font=f_foot, fill=accent)
-    img.save(path)
-
-def send_photo(path, caption=""):
-    with open(path, "rb") as f:
-        r = requests.post(
-            f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto",
-            data={"chat_id": TELEGRAM_CHAT_ID, "caption": caption},
-            files={"photo": f},
-        )
-    print("\u2705 \ubc30\ub108 \ubc1c\uc1a1 \uc644\ub8cc!" if r.status_code == 200 else f"\u274c \ubc30\ub108 \ubc1c\uc1a1 \uc2e4\ud328: {r.text}")
-
-
 def main():
     print("="*50)
     print(f"AW항공 데일리 브리핑 | {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}")
@@ -141,15 +70,6 @@ def main():
                         messages=[{"role":"user","content":f"항공 인증 전문가. 오늘({today}) 국내 항공 동향 텔레그램 메시지 작성. 구체적 사실 기반. 각 섹션은 먼저 핵심 사실을 불릿(•)으로 2~3개 정리하고, 그 아래에 짧은 줄글로 1~2문장 부연 설명을 붙여줘. 전문용어가 처음 나올 때는 괄호로 짧게 풀어써줘. 가능하면 출처 링크를 표시해줘.\n\n[웹검색]\n{korea_search}\n\n형식:\n🇰🇷 *AW항공브리핑 국내편 | {today}*\n[오늘 가장 중요한 소식을 임팩트 있게 한 줄로 요약한 후킹 헤드라인]\n\n📌 *핵심 요약*\n• 불릿1\n• 불릿2\n• 불릿3\n\n💡 *쉽게 이해하기*\n전문용어 없이 왜 중요한지 2~3문장으로 풀어서 설명\n\n🏛️ *국토부 방사청 정책 동향*\n• 불릿1\n• 불릿2\n줄글 1~2문장\n\n📢 *정부 지자체 과제 공고*\n• 과제명 및 내용\n• 과제명 및 내용\n\n🗺️ *지자체 항공 UAM 사업*\n• 지자체1 내용\n• 지자체2 내용\n\n📓 *용어 정리*\n▷ 용어1: 짧은 설명\n▷ 용어2: 짧은 설명\n\n📈 *앞으로 지켜볼 것*\n① 포인트1\n② 포인트2\n③ 포인트3\n\n💬 *결론적으로*\n1~2문장으로 종합 정리, 국내 기업에게 시사점 포함\n\n🔗 *원문 링크*\n있으면 링크 나열, 없으면 이 섹션 생략\n\n_AW인증솔루션 | awcertsolution.kr_"}])
     send(m1.content[0].text)
     send(m2.content[0].text)
-    try:
-        headline_g = extract_headline(m1.content[0].text)
-        headline_k = extract_headline(m2.content[0].text)
-        banner_path = "/tmp/aw_banner.png"
-        make_banner(headline_g, headline_k, today, banner_path)
-        send_photo(banner_path, caption=f"AW\uc555\uacf5\ube0c\ub9ac\ud551 \ubc30\ub108 | {today}")
-    except Exception as ex:
-        print(f"\u26a0\ufe0f \ubc30\ub108 \uc0dd\uc131/\ubc1c\uc1a1 \uc2e4\ud328: {ex}")
-
     print("\n🎉 완료!")
 
 if __name__ == "__main__":
