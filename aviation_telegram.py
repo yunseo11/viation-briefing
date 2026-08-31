@@ -2,8 +2,8 @@ import os
 import feedparser, anthropic, requests, datetime
 
 CLAUDE_API_KEY   = os.environ.get("CLAUDE_API_KEY")
-TELEGRAM_TOKEN   = "8385206243:AAHvdOIMBkknpJLl83iiPf8RZYHRK09sS5U"
-TELEGRAM_CHAT_ID = "8909776847"
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 RSS_FEEDS = [
     {"name": "eVTOL News",    "url": "https://evtol.news/feed"},
