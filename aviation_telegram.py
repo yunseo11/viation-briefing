@@ -6,12 +6,12 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 RSS_FEEDS = [
-    {"name": "eVTOL News",    "url": "https://evtol.news/feed"},
+    {"name": "eVTOL News",    "url": "https://evtol.news/__rss"},
     {"name": "Simple Flying", "url": "https://simpleflying.com/feed"},
     {"name": "Vertical Mag",  "url": "https://verticalmag.com/feed"},
     {"name": "Aviation Week", "url": "https://aviationweek.com/rss.xml"},
     {"name": "FAA News",      "url": "https://www.faa.gov/rss/news_updates.xml"},
-    {"name": "EASA News",     "url": "https://www.easa.europa.eu/en/rss.xml"},
+    {"name": "EASA News",     "url": "https://www.easa.europa.eu/en/newsroom-and-events/news/feed.xml"},
     {"name": "AIN Online",    "url": "https://www.ainonline.com/rss.xml"},
 ]
 
