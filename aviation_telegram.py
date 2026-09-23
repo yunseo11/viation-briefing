@@ -10,9 +10,9 @@ RSS_FEEDS = [
     {"name": "Simple Flying", "url": "https://simpleflying.com/feed"},
     {"name": "Vertical Mag",  "url": "https://verticalmag.com/feed"},
     {"name": "Aviation Week", "url": "https://aviationweek.com/rss.xml"},
-    {"name": "FAA News",      "url": "https://www.faa.gov/rss/news_updates.xml"},
+    {"name": "FAA News",      "url": "https://www.federalregister.gov/api/v1/documents.rss?conditions%5Bagencies%5D%5B%5D=federal-aviation-administration"},
     {"name": "EASA News",     "url": "https://www.easa.europa.eu/en/newsroom-and-events/news/feed.xml"},
-    {"name": "AIN Online",    "url": "https://www.ainonline.com/rss.xml"},
+    {"name": "AVweb",        "url": "https://avweb.com/feed/"},
 ]
 
 def collect_news():
