@@ -25,7 +25,9 @@ def collect_news():
             print(f"✅ {f['name']}: {min(3,len(feed.entries))}개")
         except Exception as ex:
             print(f"⚠️ {f['name']} 실패: {ex}")
-    return articlesdef web_search(client, query, max_uses=3):
+    return articles
+
+def web_search(client, query, max_uses=3):
     def _call(q):
         msg = client.messages.create(model="claude-haiku-4-5", max_tokens=1000,
             tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": max_uses}],
