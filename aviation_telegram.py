@@ -25,13 +25,18 @@ def collect_news():
             print(f"✅ {f['name']}: {min(3,len(feed.entries))}개")
         except Exception as ex:
             print(f"⚠️ {f['name']} 실패: {ex}")
-    return articles
-
-def web_search(client, query, max_uses=3):
-    msg = client.messages.create(model="claude-haiku-4-5", max_tokens=1000,
-        tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": max_uses}],
-        messages=[{"role":"user","content":query}])
-    return "".join(b.text for b in msg.content if hasattr(b, "text"))
+    return articlesdef web_search(client, query, max_uses=3):
+    def _call(q):
+        msg = client.messages.create(model="claude-haiku-4-5", max_tokens=1000,
+            tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": max_uses}],
+            messages=[{"role":"user","content":q}])
+        return "".join(b.text for b in msg.content if hasattr(b, "text"))
+    result = _call(query)
+    refusal_markers = ["구체적인 질문", "명확화", "질문이 필요", "무엇을 원하시", "어떤 정보를 찾으", "다시 말씀", "clarif", "more specific"]
+    if any(m in result for m in refusal_markers) or len(result.strip()) < 20:
+        print("   ⚠️ 검색 결과가 거절/빈 응답처럼 보여 1회 재시도")
+        result = _call(query + "\n\n다시 한번 강조: 절대 질문하거나 명확화를 요구하지 말고, 위에 나열된 키워드들로 지금 바로 web_search 도구를 호출해서 실제 검색 결과를 요약해. 텍스트로만 답하지 말고 반드시 도구를 사용해.")
+    return result
 
 def send(text):
     max_len = 4000
@@ -64,6 +69,8 @@ def main():
     global_search = web_search(client, "You must actually call the web_search tool right now and perform a real search. Do not ask for clarification no matter how the query is phrased - just search using these keywords and summarize the results. Search for latest FAA EASA aviation certification rule changes Advisory Circulars UAM eVTOL regulatory updates this week 2026. Also search for recent aviation accidents, crashes, incidents, and safety investigations worldwide in the past 3 days")
     print("🔍 국내 항공 정보 검색 중...")
     korea_search = web_search(client, "너는 지금 web_search 도구를 실제로 호출해서 검색을 수행해야 해. 검색어가 길고 여러 키워드로 보여도 절대 명확화나 재질문을 하지 말고, 아래 키워드들과 관련된 실제 최신 뉴스를 검색해서 결과를 요약해줘. 2026년 대한민국 UAM eVTOL 항공부품 인증 정부과제 공고 국토부 방사청 산업부 중기부 경남 부산 대구 인천 서울 경기 지자체 항공 UAM 사업공고 K-UAM 그랜드챌린지 NTIS IRIS 항공인증 과제공고 K-Startup(k-startup.go.kr) 항공 UAM 드론 관련 사업공고 IRIS(iris.go.kr) 항공 과제공고 TIPS 팁스 창업기업 마감일 신규 등록 최근 공고 당일자 최근 3일 이내 국내 항공 드론 헬기 사고 추락 결함 조사 안전 이슈 뉴스 산림청 소방청 국토부 항공철도사고조사위원회", max_uses=8)
+    print(f"   해외검색 미리보기: {global_search[:100]!r}")
+    print(f"   국내검색 미리보기: {korea_search[:100]!r}")
     print("✍️ 해외 브리핑 작성 중...")
     m1 = client.messages.create(model="claude-haiku-4-5", max_tokens=3200,
                 messages=[{"role":"user","content":f"항공 인증 전문가. 아래 [RSS]/[웹검색]은 실제 웹검색으로 수집한 오늘자 자료야. 너의 실시간 인터넷 접속 여부는 언급하지 말고 이 자료만 근거로 자신있게 작성해. 자료에 없는 내용은 추측하지 말고 해당 섹션은 생략해. [RSS]/[웹검색] 내용이 실제 뉴스가 아니라 오류 메시지, 검색어 재질문, 안내문처럼 보이면 그 내용을 절대 언급하거나 설명하지 말고, 대신 짧게 '오늘은 확인된 주요 해외 소식이 없습니다'라고만 답해. 오늘({today}) 해외 항공 뉴스 텔레그램 메시지 작성.  오늘 날짜 기준으로 이미 지난 날짜의 행사나 마감된 공고는 언급하지 말고, 아직 유효한 최신 정보만 포함해줘. 구체적 사실 기반. 각 섹션은 먼저 핵심 사실을 불릿(•)으로 2~3개 정리하고, 그 아래에 짧은 줄글로 1~2문장 부연 설명을 붙여줘. 전문용어가 처음 나올 때는 괄호로 짧게 풀어써줘. 가능하면 출처 링크를 표시해줘.\n\n[RSS]\n{news_text}\n\n[웹검색]\n{global_search}\n\n형식:\n✈️ *AW항공브리핑 해외편 | {today}*\n[오늘 가장 중요한 소식을 임팩트 있게 한 줄로 요약한 후킹 헤드라인]\n\n📌 *핵심 요약*\n• 불릿1\n• 불릿2\n• 불릿3\n\n💡 *쉽게 이해하기*\n전문용어 없이 왜 중요한지 2~3문장으로 풀어서 설명\n\n🚨 *최근 항공 이슈*\n최근 3일 내 해외에서 발생한 항공기·드론·헬기 관련 사고·결함·조사 등 실제 이슈가 자료에 있으면 날짜·장소·현재 상황 포함해 구체적으로 1~2건 정리, 자료에 없으면 이 섹션 생략\n• 이슈1\n• 이슈2\n줄글로 인증·안전 관점의 시사점 1문장\n\n🚁 *UAM eVTOL 글로벌 동향*\n• 불릿1\n• 불릿2\n줄글 1~2문장\n\n📋 *FAA EASA 인증 변화*\n• 불릿1\n• 불릿2\n줄글 1~2문장\n\n💼 *글로벌 비즈니스 투자*\n• 불릿1\n• 불릿2\n줄글 1문장\n\n📓 *용어 정리*\n▷ 용어1: 짧은 설명\n▷ 용어2: 짧은 설명\n\n📈 *앞으로 지켜볼 것*\n① 포인트1\n② 포인트2\n③ 포인트3\n\n💬 *결론적으로*\n1~2문장으로 종합 정리\n\n🔗 *원문 링크*\n있으면 링크 나열, 없으면 이 섹션 생략"}])
